@@ -136,3 +136,38 @@ fn collatz_naive(mut number: u128, print: bool) -> bool {
     }
     return true;
 }
+
+
+// solves collatz conject for a single number
+// returns true if converges, false if never converges
+fn collatz_benchmark_aware(mut number: u128, start: u128, print: bool) -> bool {
+    
+    // collatz conjecture algorithm
+    // with simplification:
+    //    any number found to be smaller
+    //    than previously checked value must
+    //    mean the number converges
+    while number != 1 {
+        iter = iter + 1;
+        
+        if number <= start {
+            true
+        }
+        
+        if number % 2 == 0 {
+            // number is even
+            number = number / 2;
+        } else {
+            // number is odd
+            number = (3 * number) + 1
+        }
+    }
+
+    if print {
+        println!(
+            "Number: {} converges to 1 after {} iterations!",
+            orig_num, iter
+        );
+    }
+    return true;
+}
