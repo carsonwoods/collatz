@@ -1,0 +1,8 @@
+# ignore build artifacts
+/target
+
+# ignore checkpoint files
+.collatz
+
+# ignore editor files
+.nova
