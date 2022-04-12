@@ -15,7 +15,7 @@ To start checking any number starting from 2 going to infinity (well more specif
 cargo run --release
 ```
 This will create a `.collatz` file which will store checkpoints. If this file is not deleted, it will store the latest number it has checked which was divisible by 100,000. 
-Given that no counter-example to the conjecture exists for 2*10^68, only the most recent checkpoint value is stored. 
+Given that no counter-example to the conjecture exists for 2^68, only the most recent checkpoint value is stored. 
 
 ##### Specific numbers
 
