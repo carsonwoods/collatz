@@ -2,15 +2,14 @@
 // 2022
 
 use std::env;
+use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
-use std::fs::File;
 
 fn main() {
     // collect any numbers to test from arguments
     let args: Vec<String> = env::args().collect();
-
 
     if args.len() == 1 {
         // this is the start point for calculations (save-state)
@@ -58,15 +57,19 @@ fn main() {
 
         // infinite loop to perform calculations
         loop {
+            let start = number.clone();
+
             // if number converges
             // for practical reasons, this will always converge
             // when using naive approach (no way to identify non-converging numbers)
-            if collatz_naive(number, false) {
-
+            //if collatz_naive(number, false) {
+            if collatz_benchmark_aware(number, start, false) {
                 // if number is divisible by 100, write to file as checkpoint
                 // reduces arbitrary file IO on every tested number
                 if number % 100000 == 0 {
-                    let mut file = BufWriter::new(File::create(".collatz").expect("Unable to create checkpoint file"));
+                    let mut file = BufWriter::new(
+                        File::create(".collatz").expect("Unable to create checkpoint file"),
+                    );
                     match write!(file, "{0}", number) {
                         Ok(_) => {
                             println!("Checkpoint saved for number {}", number);
@@ -86,7 +89,6 @@ fn main() {
             // increment number to test
             number = number + 1;
         }
-
     } else {
         // this runs for any number specified to be tested manually
         for arg in args[1..].iter() {
@@ -124,7 +126,23 @@ fn collatz_naive(mut number: u128, print: bool) -> bool {
             number = number / 2;
         } else {
             // number is odd
-            number = (3 * number) + 1
+            // extra logic is necessary to handle possible
+            // overflow induced incorrectness
+            number = match number.checked_mul(3) {
+                Some(n) => n,
+                None => {
+                    println!("Error: multiplication overflow");
+                    std::process::exit(1)
+                }
+            };
+
+            number = match number.checked_add(1) {
+                Some(n) => n,
+                None => {
+                    println!("Error: addition overflow");
+                    std::process::exit(1)
+                }
+            };
         }
     }
 
@@ -137,11 +155,16 @@ fn collatz_naive(mut number: u128, print: bool) -> bool {
     return true;
 }
 
-
 // solves collatz conject for a single number
 // returns true if converges, false if never converges
 fn collatz_benchmark_aware(mut number: u128, start: u128, print: bool) -> bool {
-    
+    // clones original number for record purposes
+    let orig_num: u128 = number.clone();
+
+    // counts number of iterations
+    // starting at 1 includes end state
+    let mut iter: u128 = 1;
+
     // collatz conjecture algorithm
     // with simplification:
     //    any number found to be smaller
@@ -149,17 +172,32 @@ fn collatz_benchmark_aware(mut number: u128, start: u128, print: bool) -> bool {
     //    mean the number converges
     while number != 1 {
         iter = iter + 1;
-        
         if number <= start {
-            true
+            return true;
         }
-        
+
         if number % 2 == 0 {
             // number is even
             number = number / 2;
         } else {
             // number is odd
-            number = (3 * number) + 1
+            // extra logic is necessary to handle possible
+            // overflow induced incorrectness
+            number = match number.checked_mul(3) {
+                Some(n) => n,
+                None => {
+                    println!("Error: multiplication overflow");
+                    std::process::exit(1)
+                }
+            };
+
+            number = match number.checked_add(1) {
+                Some(n) => n,
+                None => {
+                    println!("Error: addition overflow");
+                    std::process::exit(1)
+                }
+            };
         }
     }
 
